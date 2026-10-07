@@ -49,7 +49,7 @@ function AuthScreen() {
 
   return <div className="authShell">
     <div className="authPanel">
-      <div className="authHeader">Zovve Chat by Elgon Team.</div>
+      <div className="authHeader" style={{fontSize:12,fontWeight:600,letterSpacing:".15px",color:"#687186",marginBottom:54}}>Zovve Chat by Elgon Team.</div>
       <div className="authHero">
         <span className="pill"><Sparkles size={14}/> Private family space</span>
         <h1>{mode === 'join' ? 'Your family,<br/>all in one place.' : 'Welcome<br/>back home.'}</h1>
