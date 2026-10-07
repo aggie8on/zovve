@@ -115,7 +115,7 @@ function Dashboard({profile}) {
  const [liked,setLiked]=useState({})
  const [posts,setPosts]=useState([])
  const [loadingPosts,setLoadingPosts]=useState(true)
- const nav=[['Home',Home],['Calendar',CalendarDays],['Trips',MapPin],['Family',Users],['Notifications',Bell)]
+ const nav=[['Home',Home],['Calendar',CalendarDays],['Trips',MapPin],['Family',Users],['Notifications',Bell]]
 
  useEffect(()=>{
    loadPosts()
