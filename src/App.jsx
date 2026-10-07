@@ -35,7 +35,7 @@ function AuthScreen() {
     e.preventDefault()
     setLoading(true); setError(''); setMessage('')
     const cleanEmail = email.trim().toLowerCase()
-    if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(cleanEmail)) { setError('Please enter a valid email address.'); setLoading(false); return }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) { setError('Please enter a valid email address.'); setLoading(false); return }
     if (password.length < 8) { setError('Password must be at least 8 characters.'); setLoading(false); return }
     const result = mode === 'join'
       ? await supabase.auth.signUp({ email: cleanEmail, password })
