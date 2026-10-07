@@ -35,7 +35,7 @@ function AuthScreen() {
     e.preventDefault()
     setLoading(true); setError(''); setMessage('')
     const cleanEmail = email.trim().toLowerCase()
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) { setError('Please enter a valid email address.'); setLoading(false); return }
+    if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(cleanEmail)) { setError('Please enter a valid email address.'); setLoading(false); return }
     if (password.length < 8) { setError('Password must be at least 8 characters.'); setLoading(false); return }
     const result = mode === 'join'
       ? await supabase.auth.signUp({ email: cleanEmail, password })
@@ -52,7 +52,7 @@ function AuthScreen() {
       <div className="authHeader" style={{fontSize:12,fontWeight:600,letterSpacing:".15px",color:"#687186",marginBottom:54}}>Zovve Chat by Elgon Team.</div>
       <div className="authHero">
         <span className="pill"><Sparkles size={14}/> Private family space</span>
-        <h1>{mode === 'join' ? 'Your family,<br/>all in one place.' : 'Welcome<br/>back home.'}</h1>
+        <h1>{mode === 'join' ? <>Your family,<br />all in one place.</> : <>Welcome<br />back home.</>}</h1>
         <p>{mode === 'join' ? 'A quiet, private place for the people who matter most.' : 'Sign in to see what everyone is sharing.'}</p>
       </div>
       <form className="authForm" onSubmit={submit}>
