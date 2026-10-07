@@ -23,13 +23,9 @@ function Avatar({letter,tone='blue',size=''}) {
   return <div className={`avatar ${tone} ${size}`}>{letter}</div>
 }
 
-function usernameEmail(username) {
-  return username.toLowerCase().trim() + '@zovve.xyz'
-}
-
 function AuthScreen() {
   const [mode, setMode] = useState('join')
-  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -38,13 +34,12 @@ function AuthScreen() {
   async function submit(e) {
     e.preventDefault()
     setLoading(true); setError(''); setMessage('')
-    const cleanUsername = username.trim().toLowerCase()
-    if (!/^[a-z0-9_]{3,24}$/.test(cleanUsername)) { setError('Username must be 3–24 characters using letters, numbers, or underscores.'); setLoading(false); return }
+    const cleanEmail = email.trim().toLowerCase()
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) { setError('Please enter a valid email address.'); setLoading(false); return }
     if (password.length < 8) { setError('Password must be at least 8 characters.'); setLoading(false); return }
-    const email = usernameEmail(cleanUsername)
     const result = mode === 'join'
-      ? await supabase.auth.signUp({ email, password })
-      : await supabase.auth.signInWithPassword({ email, password })
+      ? await supabase.auth.signUp({ email: cleanEmail, password })
+      : await supabase.auth.signInWithPassword({ email: cleanEmail, password })
     const { error, data } = result
     if (error) setError(error.message)
     else if (mode === 'join') setMessage(data.session ? 'Account created. Now complete your family profile.' : 'Account created. If you cannot continue, the family login settings need to be enabled in Supabase.')
@@ -61,8 +56,8 @@ function AuthScreen() {
         <p>{mode === 'join' ? 'A quiet, private place for the people who matter most.' : 'Sign in to see what everyone is sharing.'}</p>
       </div>
       <form className="authForm" onSubmit={submit}>
-        <label>Username</label>
-        <div className="authInput"><UserRound size={18}/><input type="text" value={username} onChange={e=>setUsername(e.target.value.toLowerCase())} placeholder="e.g. sarah" autoComplete="username" required /></div>
+        <label>Email address</label>
+        <div className="authInput"><UserRound size={18}/><input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" required /></div>
         <label>Password</label>
         <div className="authInput"><LockKeyhole size={18}/><input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="At least 8 characters" autoComplete={mode==='join'?'new-password':'current-password'} required /></div>
         <button className="authSubmit" disabled={loading}>{loading ? <><Loader2 className="spin" size={18}/> {mode==='join'?'Creating account...':'Signing in...'}</> : <>{mode === 'join' ? 'Create family account' : 'Sign in'} <ArrowRight size={17}/></>}</button>
@@ -70,7 +65,7 @@ function AuthScreen() {
         {error && <div className="errorBox">{error}</div>}
       </form>
       <div className="authSwitch">{mode === 'join' ? <>Already joined? <button onClick={()=>{setMode('login');setMessage('');setError('')}}>Sign in</button></> : <>New family member? <button onClick={()=>{setMode('join');setMessage('');setError('')}}>Join Zovve</button></>}</div>
-      <small className="authPrivacy"><LockKeyhole size={13}/> Invitation-only family access · No email required</small>
+      <small className="authPrivacy"><LockKeyhole size={13}/> Invitation-only family access · Email required</small>
     </div>
     <div className="authArt"><div className="authSun"/><div className="authHill one"/><div className="authHill two"/><div className="authQuote">“The little moments<br/>become the big memories.”</div></div>
   </div>
@@ -93,7 +88,7 @@ function Onboarding({user,onComplete}) {
     <div className="brand"><div className="brandMark">z</div><span>zovve</span></div>
     <div className="onboardingIcon"><Sparkles size={22}/></div><span className="eyebrow">One last step</span>
     <h1>Tell the family<br/>who you are.</h1>
-    <p className="onboardingIntro">Choose your family username and add the details the family calendar needs.</p>
+    <p className="onboardingIntro">Add the details the family calendar needs to get started.</p>
     <form className="onboardingForm" onSubmit={submit}>
       <label>Username<input value={username} onChange={e=>setUsername(e.target.value.toLowerCase())} placeholder="e.g. sarah" required /></label>
       <label>Your name<input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Sarah" required /></label>
