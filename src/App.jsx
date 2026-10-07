@@ -23,9 +23,14 @@ function Avatar({letter,tone='blue',size=''}) {
   return <div className={`avatar ${tone} ${size}`}>{letter}</div>
 }
 
+function usernameEmail(username) {
+  return username.toLowerCase().trim() + '@zovve.local'
+}
+
 function AuthScreen() {
   const [mode, setMode] = useState('join')
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -33,17 +38,17 @@ function AuthScreen() {
   async function submit(e) {
     e.preventDefault()
     setLoading(true); setError(''); setMessage('')
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
-      options: {
-        shouldCreateUser: mode === 'join',
-        emailRedirectTo: window.location.origin,
-      },
-    })
+    const cleanUsername = username.trim().toLowerCase()
+    if (!/^[a-z0-9_]{3,24}$/.test(cleanUsername)) { setError('Username must be 3–24 characters using letters, numbers, or underscores.'); setLoading(false); return }
+    if (password.length < 8) { setError('Password must be at least 8 characters.'); setLoading(false); return }
+    const email = usernameEmail(cleanUsername)
+    const result = mode === 'join'
+      ? await supabase.auth.signUp({ email, password })
+      : await supabase.auth.signInWithPassword({ email, password })
+    const { error, data } = result
     if (error) setError(error.message)
-    else setMessage(mode === 'join'
-      ? 'Check your email for your private Zovve sign-in link. You’ll finish your family profile after opening it.'
-      : 'Check your email for your Zovve sign-in link.')
+    else if (mode === 'join') setMessage(data.session ? 'Account created. Now complete your family profile.' : 'Account created. If you cannot continue, the family login settings need to be enabled in Supabase.')
+    else setMessage('Welcome back.')
     setLoading(false)
   }
 
@@ -53,21 +58,19 @@ function AuthScreen() {
       <div className="authHero">
         <span className="pill"><Sparkles size={14}/> Private family space</span>
         <h1>{mode === 'join' ? 'Your family,<br/>all in one place.' : 'Welcome<br/>back home.'}</h1>
-        <p>{mode === 'join'
-          ? 'A quiet, private place for the people who matter most.'
-          : 'Sign in to see what everyone is sharing.'}</p>
+        <p>{mode === 'join' ? 'A quiet, private place for the people who matter most.' : 'Sign in to see what everyone is sharing.'}</p>
       </div>
       <form className="authForm" onSubmit={submit}>
-        <label>Email address</label>
-        <div className="authInput"><UserRound size={18}/><input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com" required /></div>
-        <button className="authSubmit" disabled={loading}>{loading ? <><Loader2 className="spin" size={18}/> Sending...</> : <>Continue with email <ArrowRight size={17}/></>}</button>
+        <label>Username</label>
+        <div className="authInput"><UserRound size={18}/><input type="text" value={username} onChange={e=>setUsername(e.target.value.toLowerCase())} placeholder="e.g. sarah" autoComplete="username" required /></div>
+        <label>Password</label>
+        <div className="authInput"><LockKeyhole size={18}/><input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="At least 8 characters" autoComplete={mode==='join'?'new-password':'current-password'} required /></div>
+        <button className="authSubmit" disabled={loading}>{loading ? <><Loader2 className="spin" size={18}/> {mode==='join'?'Creating account...':'Signing in...'}</> : <>{mode === 'join' ? 'Create family account' : 'Sign in'} <ArrowRight size={17}/></>}</button>
         {message && <div className="successBox">{message}</div>}
         {error && <div className="errorBox">{error}</div>}
       </form>
-      <div className="authSwitch">
-        {mode === 'join' ? <>Already joined? <button onClick={()=>{setMode('login');setMessage('')}}>Sign in</button></> : <>New family member? <button onClick={()=>{setMode('join');setMessage('')}}>Join Zovve</button></>}
-      </div>
-      <small className="authPrivacy"><LockKeyhole size={13}/> Invitation-only family access</small>
+      <div className="authSwitch">{mode === 'join' ? <>Already joined? <button onClick={()=>{setMode('login');setMessage('');setError('')}}>Sign in</button></> : <>New family member? <button onClick={()=>{setMode('join');setMessage('');setError('')}}>Join Zovve</button></>}</div>
+      <small className="authPrivacy"><LockKeyhole size={13}/> Invitation-only family access · No email required</small>
     </div>
     <div className="authArt"><div className="authSun"/><div className="authHill one"/><div className="authHill two"/><div className="authQuote">“The little moments<br/>become the big memories.”</div></div>
   </div>
@@ -77,39 +80,31 @@ function Onboarding({user,onComplete}) {
   const [name,setName]=useState('')
   const [dob,setDob]=useState('')
   const [code,setCode]=useState('')
+  const [username,setUsername]=useState(user?.email?.split('@')[0] || '')
   const [loading,setLoading]=useState(false)
   const [error,setError]=useState('')
-
   async function submit(e) {
-    e.preventDefault()
-    setLoading(true); setError('')
-    const {data,error} = await supabase.rpc('complete_onboarding',{
-      p_full_name:name.trim(), p_date_of_birth:dob, p_invite_code:code.trim()
-    })
-    if(error) setError(error.message.replace(/^.*exception /i,'').replace(/^"|"$/g,''))
-    else onComplete(data)
+    e.preventDefault(); setLoading(true); setError('')
+    const {data,error} = await supabase.rpc('complete_onboarding',{p_full_name:name.trim(), p_date_of_birth:dob, p_invite_code:code.trim(), p_username:username.trim().toLowerCase()})
+    if(error) setError(error.message.replace(/^.*exception /i,'').replace(/^"|"$/g,'')); else onComplete(data)
     setLoading(false)
   }
-
-  return <div className="onboardingShell">
-    <div className="onboardingCard">
-      <div className="brand"><div className="brandMark">z</div><span>zovve</span></div>
-      <div className="onboardingIcon"><Sparkles size={22}/></div>
-      <span className="eyebrow">One last step</span>
-      <h1>Tell the family<br/>who you are.</h1>
-      <p className="onboardingIntro">Your email is <strong>{user.email}</strong>. Add the details the family calendar needs.</p>
-      <form className="onboardingForm" onSubmit={submit}>
-        <label>Your name<input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Sarah" required /></label>
-        <label>Date of birth<input type="date" value={dob} onChange={e=>setDob(e.target.value)} required /></label>
-        <label>Family invitation code<input value={code} onChange={e=>setCode(e.target.value)} placeholder="ZOVVE-FAMILY-2026" required /></label>
-        {error && <div className="errorBox">{error}</div>}
-        <button className="authSubmit" disabled={loading}>{loading ? <><Loader2 className="spin" size={18}/> Setting up...</> : <>Enter the family <ArrowRight size={17}/></>}</button>
-      </form>
-      <button className="signOutLink" onClick={()=>supabase.auth.signOut()}>Use a different email</button>
-    </div>
-  </div>
+  return <div className="onboardingShell"><div className="onboardingCard">
+    <div className="brand"><div className="brandMark">z</div><span>zovve</span></div>
+    <div className="onboardingIcon"><Sparkles size={22}/></div><span className="eyebrow">One last step</span>
+    <h1>Tell the family<br/>who you are.</h1>
+    <p className="onboardingIntro">Choose your family username and add the details the family calendar needs.</p>
+    <form className="onboardingForm" onSubmit={submit}>
+      <label>Username<input value={username} onChange={e=>setUsername(e.target.value.toLowerCase())} placeholder="e.g. sarah" required /></label>
+      <label>Your name<input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Sarah" required /></label>
+      <label>Date of birth<input type="date" value={dob} onChange={e=>setDob(e.target.value)} required /></label>
+      <label>Family invitation code<input value={code} onChange={e=>setCode(e.target.value)} placeholder="ZOVVE-FAMILY-2026" required /></label>
+      {error && <div className="errorBox">{error}</div>}
+      <button className="authSubmit" disabled={loading}>{loading ? <><Loader2 className="spin" size={17}/> Setting up...</> : <>Enter the family <ArrowRight size={17}/></>}</button>
+    </form>
+    <button className="signOutLink" onClick={()=>supabase.auth.signOut()}>Use a different account</button>
+  </div></div>
 }
-
 function Dashboard({profile}) {
  const [active,setActive]=useState('Home')
  const [liked,setLiked]=useState({})
