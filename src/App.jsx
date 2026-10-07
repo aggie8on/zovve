@@ -24,7 +24,7 @@ function Avatar({letter,tone='blue',size=''}) {
 }
 
 function usernameEmail(username) {
-  return username.toLowerCase().trim() + '@zovve.local'
+  return username.toLowerCase().trim() + '@zovve.xyz'
 }
 
 function AuthScreen() {
