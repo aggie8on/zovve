@@ -53,7 +53,7 @@ function AuthScreen() {
       <div className="authHero">
         <span className="pill"><Sparkles size={14}/> Private team space</span>
         <h1>{mode === 'join' ? <>Your team,<br/>all in one place.</> : <>Welcome<br />back home.</>}</h1>
-        <p>{mode === 'join' ? 'A private place for your Elgon Team to share the little moments that matter.' : 'Sign in to see what everyone is sharing.'}</p>
+        <p>{mode === 'join' ? 'A private place for your Team to share the little moments that matter.' : 'Sign in to see what everyone is sharing.'}</p>
       </div>
       <form className="authForm" onSubmit={submit}>
         <label>Email address</label>
