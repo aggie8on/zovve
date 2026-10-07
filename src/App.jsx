@@ -49,7 +49,7 @@ function AuthScreen() {
 
   return <div className="authShell">
     <div className="authPanel">
-      <div className="brand authBrand"><div className="brandMark">z</div><span>zovve</span></div>
+      <div className="authHeader">Zovve Chat by Elgon Team.</div>
       <div className="authHero">
         <span className="pill"><Sparkles size={14}/> Private family space</span>
         <h1>{mode === 'join' ? 'Your family,<br/>all in one place.' : 'Welcome<br/>back home.'}</h1>
@@ -65,7 +65,7 @@ function AuthScreen() {
         {error && <div className="errorBox">{error}</div>}
       </form>
       <div className="authSwitch">{mode === 'join' ? <>Already joined? <button onClick={()=>{setMode('login');setMessage('');setError('')}}>Sign in</button></> : <>New family member? <button onClick={()=>{setMode('join');setMessage('');setError('')}}>Join Zovve</button></>}</div>
-      <small className="authPrivacy"><LockKeyhole size={13}/> Invitation-only family access · Email required</small><div className="authFooter">Zovve Chat by Elgon Team.</div>
+      <small className="authPrivacy"><LockKeyhole size={13}/> Invitation-only family access · Email required</small>
     </div>
     <div className="authArt"><div className="authSun"/><div className="authHill one"/><div className="authHill two"/><div className="authQuote">“The little moments<br/>become the big memories.”</div></div>
   </div>
