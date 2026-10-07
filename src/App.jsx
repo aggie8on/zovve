@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   CalendarDays, Camera, Heart, Home, Image, MapPin, MessageCircle,
-  Mic, MoreHorizontal, Plus, Send, Settings, Sparkles, Users, Bell, Pause, X, Trash2
+  Mic, MoreHorizontal, Plus, Send, Settings, Sparkles, Users, Bell, Pause, X, Trash2,
   ChevronRight, LogOut, Loader2, ArrowRight, LockKeyhole, UserRound
 } from 'lucide-react'
 import { supabase } from './lib/supabaseClient'
